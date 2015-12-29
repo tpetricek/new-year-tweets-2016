@@ -24,7 +24,7 @@
     #tweets { margin-top:20px; min-height:500px; }    
     #tweets, #tweets li { list-style-type:none; }
     #tweets li { margin:0px 20px 0px 30px; }
-    #tweets li img { float:left; width:50px; height:50px; border-radius:25px; opacity:0.5; }
+    #tweets li img { float:left; width:50px; height:50px; border-radius:25px; opacity:0.7; }
     #tweets li p { position:relative; margin-left:80px; }
     
     @media (min-width: 900px) {
@@ -83,7 +83,7 @@
   
   // Listen to tweets with geolocation and show them on the map
   function listenToMapTweets() {
-    var tweets = new RingBuffer(50);
+    var tweets = new RingBuffer(20);
     websocket = new WebSocket(root + "maptweets");
     websocket.onmessage = function(evt) { 
       var res = JSON.parse(evt.data);
@@ -148,7 +148,7 @@
       var colorIndex = -1;
       pps.each(function() { 
         var count = lookup[$(this).text()];
-        var size = 10 + 35 * ((1 + count) / 100); 
+        var size = 15 + 40 * ((1 + count) / 100); 
         if (count == 0) size = 0;
         else
         {
