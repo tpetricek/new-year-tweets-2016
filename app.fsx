@@ -5,7 +5,7 @@
 #r "FSharp.Data.dll"
 
 #load "async.fs"
-#load "keys.fsx"
+#load "config.fsx"
 
 open System
 open System.Web
@@ -70,7 +70,7 @@ let zoneSequence =
 module MapQuest = 
   // Use JSON provider to get a type for calling the API
   let [<Literal>] MapQuestSample = 
-    "http://www.mapquestapi.com/geocoding/v1/address?location=Prague&key=" + Keys.MapQuestKey
+    "http://www.mapquestapi.com/geocoding/v1/address?location=Prague&key=" + Config.MapQuestKey
   type MapQuest = JsonProvider<MapQuestSample>
 
   /// Returns a tuple with the original location, geolocation API used, inferred location and lat/lng coordinates
@@ -78,7 +78,7 @@ module MapQuest =
     try
       let url = 
         "http://www.mapquestapi.com/geocoding/v1/address?key=" +
-          Keys.MapQuestKey + "&location=" + (HttpUtility.UrlEncode place)
+          Config.MapQuestKey + "&location=" + (HttpUtility.UrlEncode place)
       let! mapQuest = MapQuest.AsyncLoad(url)
       return 
         mapQuest.Results
@@ -100,7 +100,7 @@ module MapQuest =
 module Bing = 
   // Use JSON provider to get a type for calling the API
   let [<Literal>] BingSample = 
-    "http://dev.virtualearth.net/REST/v1/Locations?query=Prague&includeNeighborhood=1&maxResults=5&key=" + Keys.BingKey
+    "http://dev.virtualearth.net/REST/v1/Locations?query=Prague&includeNeighborhood=1&maxResults=5&key=" + Config.BingKey
   type Bing = JsonProvider<BingSample>
 
   /// Returns a tuple with the original location, geolocation API used, inferred location and lat/lng coordinates
@@ -108,7 +108,7 @@ module Bing =
     try
       let url = 
         "http://dev.virtualearth.net/REST/v1/Locations?query=" + 
-          (HttpUtility.UrlEncode place) + "&includeNeighborhood=1&maxResults=5&key=" + Keys.BingKey
+          (HttpUtility.UrlEncode place) + "&includeNeighborhood=1&maxResults=5&key=" + Config.BingKey
       let! bing = Bing.AsyncLoad(url)
       return
         bing.ResourceSets
@@ -155,8 +155,8 @@ let phrases =
 
 // Connect to twitter using the application access key (directly) & search for tweets!
 let ctx = 
-  { ConsumerKey = Keys.TwitterKey; ConsumerSecret = Keys.TwitterSecret; 
-     AccessToken = Keys.TwitterAccessToken; AccessSecret = Keys.TwitterAccessSecret } 
+  { ConsumerKey = Config.TwitterKey; ConsumerSecret = Config.TwitterSecret; 
+     AccessToken = Config.TwitterAccessToken; AccessSecret = Config.TwitterAccessSecret } 
 let twitter = Twitter(UserContext(ctx))
 let search = twitter.Streaming.FilterTweets phrases 
 
@@ -361,7 +361,10 @@ let part =
       path "/">>= Files.browseFile root "index.html" 
       Files.browse root ]
 
-let start, run = startWebServerAsync defaultConfig part
+open Suave.Types
+
+let config = { defaultConfig with bindings = [ HttpBinding.mk' Protocol.HTTP Config.IP Config.Port ] }
+let start, run = startWebServerAsync config part
 let ct = new System.Threading.CancellationTokenSource()
 Async.Start(run, ct.Token)
 

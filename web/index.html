@@ -77,11 +77,12 @@
   
   // Keeps a reference to the current map object, once created
   var map = null;
+  var root = "ws://" + window.location.hostname + ":" + window.location.port + "/"
   
   // Listen to tweets with geolocation and show them on the map
   function listenToMapTweets() {
     var tweets = new RingBuffer(50);
-    websocket = new WebSocket("ws://localhost:8083/maptweets");
+    websocket = new WebSocket(root + "maptweets");
     websocket.onmessage = function(evt) { 
       var res = JSON.parse(evt.data);
       res.radius = 10;
@@ -103,7 +104,7 @@
 
   // Listen to tweets without geolocation and show them in the feed
   function listenToFeedTweets() {
-    websocket = new WebSocket("ws://localhost:8083/feedtweets");
+    websocket = new WebSocket(root + "feedtweets");
     websocket.onmessage = function(evt) { 
       var res = JSON.parse(evt.data);    
       $("#tweets li").slice(5, $("#tweets li").length).remove();
@@ -124,7 +125,7 @@
   
   // Listen to phrase frequency updates and update the word cloud
   function listenToFrequencies() {
-    websocket = new WebSocket("ws://localhost:8083/frequencies");
+    websocket = new WebSocket(root + "frequencies");
     websocket.onmessage = function(evt) { 
       var res = JSON.parse(evt.data);
       var pps = $("#phrases span");

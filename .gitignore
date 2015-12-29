@@ -1,4 +1,4 @@
-keys.fsx
+config.fsx
 .fake
 .paket/paket.exe
 *.suo

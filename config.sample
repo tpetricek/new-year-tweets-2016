@@ -1,4 +1,4 @@
-﻿module Keys
+﻿module Config
 
 // Bing key from https://www.bingmapsportal.com
 let [<Literal>] BingKey = "..."
@@ -10,3 +10,7 @@ let [<Literal>] TwitterKey = "..."
 let [<Literal>] TwitterSecret = "..."
 let [<Literal>] TwitterAccessToken = "..."
 let [<Literal>] TwitterAccessSecret = "..."
+
+// Configruation for the server
+let [<Literal>] IP = "127.0.0.1" 
+let [<Literal>] Port = 8083
