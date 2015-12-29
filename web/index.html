@@ -9,9 +9,9 @@
   <link href='https://fonts.googleapis.com/css?family=Raleway|Comfortaa:700' rel='stylesheet' type='text/css'>
   <style>
     * { margin:0px; padding:0px; }
-    body { font:14pt Raleway; background:black; color:#f0f0f0; }
-    h1 { font:36pt Comfortaa; margin:0px 0px 5px 0px; }
-    h2 { font:28pt Comfortaa; margin:30px 0px 5px 0px; }
+    body { font:12pt Raleway; background:black; color:#f0f0f0; }
+    h1 { font:34pt Comfortaa; margin:0px 0px 5px 0px; }
+    h2 { font:26pt Comfortaa; margin:30px 0px 5px 0px; }
     #content { max-width:1200px; padding:30px; background:#181818; margin-left:auto; margin-right:auto; }
     
     #map { margin:30px 0px 0px 0px; }
@@ -22,7 +22,7 @@
     #phrases span { font-family:Comfortaa; margin-top:10px; margin-bottom:10px; transition:all 1s ease; }
     
     #tweets { margin-top:20px; min-height:500px; }    
-    #tweets ul { list-style:none; }
+    #tweets, #tweets li { list-style-type:none; }
     #tweets li { margin:0px 20px 0px 30px; }
     #tweets li img { float:left; width:50px; height:50px; border-radius:25px; opacity:0.5; }
     #tweets li p { position:relative; margin-left:80px; }
@@ -145,7 +145,7 @@
       var colorIndex = -1;
       pps.each(function() { 
         var count = lookup[$(this).text()];
-        var size = 15 + 40 * ((1 + count) / 100); 
+        var size = 10 + 35 * ((1 + count) / 100); 
         if (count == 0) size = 0;
         else
         {

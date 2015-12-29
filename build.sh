@@ -23,4 +23,4 @@ exit_code=$?
 if [ $exit_code -ne 0 ]; then
   exit $exit_code
 fi
-$MONO packages/FSharp.Compiler.Tools/tools/fsi.exe app.fsx
+$MONO packages/FSharp.Compiler.Tools/tools/fsi.exe --load:app.fsx
