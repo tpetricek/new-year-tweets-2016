@@ -11,4 +11,4 @@ if not exist paket.lock (
 if errorlevel 1 (
   exit /b %errorlevel%
 )
-packages\FSharp.Compiler.Tools\tools\fsi.exe script.fsx
+packages\FSharp.Compiler.Tools\tools\fsi.exe app.fsx
