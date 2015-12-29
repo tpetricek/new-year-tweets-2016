@@ -1,0 +1,12 @@
+﻿module Keys
+
+// Bing key from https://www.bingmapsportal.com
+let [<Literal>] BingKey = "..."
+// MapQuest key from https://developer.mapquest.com/
+let [<Literal>] MapQuestKey = "..."
+
+// Twitter keys from https://dev.twitter.com/rest/public
+let [<Literal>] TwitterKey = "..."
+let [<Literal>] TwitterSecret = "..."
+let [<Literal>] TwitterAccessToken = "..."
+let [<Literal>] TwitterAccessSecret = "..."

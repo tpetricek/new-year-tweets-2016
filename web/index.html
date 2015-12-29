@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Happy New Year Around the World</title>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+  <script src="/datamaps.world.min.js"></script>
+  <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Raleway|Comfortaa:700' rel='stylesheet' type='text/css'>
+  <style>
+    * { margin:0px; padding:0px; }
+    body { font:14pt Raleway; background:black; color:#f0f0f0; }
+    h1 { font:36pt Comfortaa; margin:0px 0px 5px 0px; }
+    h2 { font:28pt Comfortaa; margin:30px 0px 5px 0px; }
+    #content { max-width:1200px; padding:30px; background:#181818; margin-left:auto; margin-right:auto; }
+    
+    #map { margin:30px 0px 0px 0px; }
+    .hoverinfo { padding:10px !important; border-color:#404040 !important; background:rgba(0,0,0,0.75) !important; max-width:300px; }
+    .hoverinfo img { float:left; width:50px; height:50px; border-radius:25px; opacity:0.8; }
+    .hoverinfo p { font:10pt Raleway; margin-left:60px; min-height:50px; }
+    #phrases { padding:20px 10% 10px 10%; text-align:center; }
+    #phrases span { font-family:Comfortaa; margin-top:10px; margin-bottom:10px; transition:all 1s ease; }
+    
+    #tweets { margin-top:20px; min-height:500px; }    
+    #tweets ul { list-style:none; }
+    #tweets li { margin:0px 20px 0px 30px; }
+    #tweets li img { float:left; width:50px; height:50px; border-radius:25px; opacity:0.5; }
+    #tweets li p { position:relative; margin-left:80px; }
+    
+    @media (min-width: 900px) {
+      #phrases { padding-top:50px; }
+      .cl { float:left; width:48%; }
+      .cr { width:48%;margin-left:51%; }
+    } 
+  </style>
+</head>
+<body>
+  <div id="content">
+    <h1>Happy New Year around the World</h1>  
+    <p>Follow the beginning of 2016 on Twitter. Watch the 'Happy New Year' tweets live across the globe!</p>  
+    <div id="map" style="position:relative; width:90%; margin-left:5%;"></div>
+  
+    <div class="cl">
+      <h2>Trending Wishes</h2>
+      <p>What are the most frequently tweeted phrases right now? Where on the globe is the New Year starting?</p>
+      <div id="phrases" style="color:white"></div>
+    </div>
+  
+    <div class="cr">
+      <h2>Selected Tweets</h2>
+      <ul id="tweets">
+      </ul>
+    </div>
+</div>
+<script>
+
+  // Resize the map depending on its width
+  $("#map").height($("#map").width()/2);
+
+  // We often need to keep some history and overwrite it as we go...
+  var RingBuffer = function(count) {
+    var buffer = new Array(count);
+    var index = 0;
+    this.add = function(v) {
+      buffer[index] = v;
+      index = (index + 1) % count;
+    }
+    this.values = function() {
+      return buffer.filter(function(a){ return a != null; });
+    }
+  }
+  
+  // Clean some twitter noise from a tweet text
+  function cleanText(text) {
+    return text.replace(/((RT )?@[0-9_A-Za-z]+:?)|(https?:[^ ]+)/g, "");
+  }
+  
+  // Keeps a reference to the current map object, once created
+  var map = null;
+  
+  // Listen to tweets with geolocation and show them on the map
+  function listenToMapTweets() {
+    var tweets = new RingBuffer(50);
+    websocket = new WebSocket("ws://localhost:8083/maptweets");
+    websocket.onmessage = function(evt) { 
+      var res = JSON.parse(evt.data);
+      res.radius = 10;
+      res.fillKey = "tweet";
+      tweets.add(res);        
+      if (map != null) {
+        map.bubbles(tweets.values(), {
+          popupTemplate: function (geo, data) {
+            //  return ['<div class="hoverinfo"><strong>', data.originalArea, '</strong> (',
+            //    data.geocoder, ')<br/>', cleanText(data.text), '</div>' ].join('');
+            return ['<div class="hoverinfo"><img src="', data.picture,
+              '" /><p><strong>', data.screenName, '</strong><br/>', 
+              cleanText(data.text), '</p></div>' ].join('');
+          }
+        });
+      }
+    };
+  }
+
+  // Listen to tweets without geolocation and show them in the feed
+  function listenToFeedTweets() {
+    websocket = new WebSocket("ws://localhost:8083/feedtweets");
+    websocket.onmessage = function(evt) { 
+      var res = JSON.parse(evt.data);    
+      $("#tweets li").slice(5, $("#tweets li").length).remove();
+      
+      var li = $("<li style='opacity:0;xoverflow:hidden' />");
+      var p = $("<p>" + cleanText(res.text) + "</p>");
+      li.append($("<img src='" + res.picture + "'/>"));
+      li.append(p);
+      
+      $("#tweets").prepend(li);
+      var oh = p.height();
+      var nh = oh < 50 ? 50 : oh;
+      if (oh < 40) p.css("padding-top", (40-oh)/2);
+      li.css("height", "0px")
+      li.animate({opacity:1, height:nh + 15}, "linear");
+    };
+  }
+  
+  // Listen to phrase frequency updates and update the word cloud
+  function listenToFrequencies() {
+    websocket = new WebSocket("ws://localhost:8083/frequencies");
+    websocket.onmessage = function(evt) { 
+      var res = JSON.parse(evt.data);
+      var pps = $("#phrases span");
+      if (pps.length == 0)
+      {
+        // Initialize the word cloud with <span> for each phrase (1st time only)
+        res.forEach(function(pc) { 
+          $("#phrases").append($("<span>" + pc.phrase + "</span>"));
+        });
+        pps = $("#phrases span");          
+      }         
+      
+      // Create lookup with counts for each phrase
+      var lookup = { };
+      res.forEach(function(pc) { lookup[pc.phrase] = pc.count; });
+      
+      var colors = ['#7fc97f', '#beaed4', '#fdc086', '#ffff99' ];
+      var colorIndex = -1;
+      pps.each(function() { 
+        var count = lookup[$(this).text()];
+        var size = 15 + 40 * ((1 + count) / 100); 
+        if (count == 0) size = 0;
+        else
+        {
+          if (++colorIndex == colors.length) colorIndex = 0;
+          $(this).css("color", colors[colorIndex]);
+        }        
+        $(this).css("display", "inline-block");
+        $(this).css("font-size", Math.round(size)+"px");
+        $(this).css("margin-left", Math.round(size)+"px");
+        $(this).css("margin-right", Math.round(size)+"px");
+      });
+    };
+  }
+
+  // Construct the map
+  function createMap() {
+    $.ajax({ url:"/zones", type: "GET" }).done(function (res) {
+      
+      // Create a lookup mapping country names to country IDs (as in Datamap)
+      var lookup = { };
+      Datamap.prototype.worldTopo.objects.world.geometries.forEach(function(topo) {
+        lookup[topo.properties.name] = topo.id;
+      });
+
+      // Create a lookup mapping country IDs to the time zone info
+      var o = JSON.parse(res);
+      var data = { };
+      o.countries.forEach(function(kv){ 
+        data[lookup[kv.country]] = { fillKey: kv.zone };
+      });
+      
+      // Create fills object with color for each time zone
+      var fills = { 
+        defaultFill: '#EDDC4E',
+        tweet: '#f0027f'
+      }
+      var colors = ['#7fc97f', '#beaed4', '#fdc086', '#ffff99' ];
+      var index = -1;
+      o.zones.forEach(function(tz) {
+        if (++index == colors.length) index = 0;
+        fills[tz] = colors[index];
+      });
+      
+      // Create the data map!
+      map = new Datamap({
+        element: document.getElementById('map'),
+        scope: 'world',
+        geographyConfig: {
+          popupOnHover: true,
+          highlightOnHover: true,
+          borderColor: "#606060"
+        },
+        bubblesConfig: {
+          borderWidth: 1,
+          highlightFillColor: '#FF60B5',
+          highlightBorderColor: '#ffffff',
+          highlightBorderWidth: 1,
+        },
+        fills: fills,
+        data: data
+      });
+    });
+  }
+    
+  window.addEventListener("load", createMap, false);
+  window.addEventListener("load", listenToMapTweets, false);
+  window.addEventListener("load", listenToFeedTweets, false);
+  window.addEventListener("load", listenToFrequencies, false);
+</script>
+</body>
+</html>

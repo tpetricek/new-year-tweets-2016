@@ -1,0 +1,8 @@
+keys.fsx
+.fake
+.paket/paket.exe
+*.suo
+bin
+obj
+packages
+paket-files
