@@ -156,7 +156,15 @@ let phrases =
   "yeni yılınız kutlu olsun"; "feliz año nuevo"; "happy new year"; "Καλή Χρονιά";"godt nyttår"
   "bon any nou"; "felice anno nuovo"; "sretna nova godina"; "godt nytår"; "gelukkig nieuwjaar"
   "Frohes neues Jahr"; "urte berri on"; "bonne année"; "boldog új évet"; "gott nytt år"
-  "szczęśliwego nowego roku"; "blwyddyn newydd dda"; "feliz ano novo" ]
+  "szczęśliwego nowego roku"; "blwyddyn newydd dda"; "feliz ano novo" 
+
+  "سنة_جديدة_سعيدة#"; "#হ্যাপিনিউইয়ার"; "#新年快乐"; "#新年快樂"; "#StastnyNovyRok"; "#GodtNytår"
+  "#GelukkigNieuwJaar"; "#HappyNewYear"; "سال‌نومبارک#"; "#OnnellistaUuttaVuotta"; "#BonneAnnée"
+  "#FrohesNeuesJahr"; "#KaliXronia"; "#હેપીન્યૂયર"; "שנהאזרחיתטובה#"; "#नववर्षकीशुभकामनाएँ"; "#BoldogÚjÉvet"
+  "#SelamatTahunBaru"; "#FeliceAnnoNuovo"; "#ಹ್ಯಾಪಿನ್ಯೂಇಯರ್"; "#SelamatTahunBaru"; "#ഹാപ്പിന്യൂഇയർ"
+  "#हैप्पीन्यूयर"; "#GodtNyttÅr"; "#SzczęśliwegoNowegoRoku"; "#FelizAnoNovo"; "#ਹੈਪੀਨਿਊਯੀਅਰ";
+  "#LaMulțiAni"; "#СНовымГодом"; "#FelizAñoNuevo"; "#GottNyttÅr"; "#ManigongBagongTaon";
+  "#ஹேப்பிநியூஇயர்"; "#สวัสดีปีใหม่"; "#MutluYıllar"; "#ЗНовимРоком"; "نیا_سال_مبارک#" ]
 
 // Connect to twitter using the application access key (directly) & search for tweets!
 let ctx = 
