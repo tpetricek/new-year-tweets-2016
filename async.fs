@@ -290,3 +290,10 @@ module Observable =
         let s, r = f s v
         s, Some r) (state, None)
     |> Observable.choose (function n, Some tw -> Some(n, tw) | _ -> None)
+
+  let addWithError f ef (source:IObservable<_>) = 
+    source.Subscribe 
+      { new IObserver<_> with
+          member x.OnCompleted() = ()
+          member x.OnError(e) = ef e 
+          member x.OnNext(v) = f v } |> ignore

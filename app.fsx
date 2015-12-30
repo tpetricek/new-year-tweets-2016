@@ -95,7 +95,9 @@ module MapQuest =
               |> Seq.filter (fun s -> System.String.IsNullOrEmpty(s) |> not)
               |> String.concat ", "
             info.ProvidedLocation.Location, "MapQuest", area, (loc.LatLng.Lat, loc.LatLng.Lng))
-    with e -> return None }
+    with e -> 
+      printfn "[ERROR] MapQuest failed: %A" e
+      return None }
 
 
 module Bing = 
@@ -119,7 +121,9 @@ module Bing =
             | [| lat; lng |] -> Some(place, "Bing", r.Name, (lat, lng))
             | _ -> None)
         |> Seq.tryFind (fun _ -> true)
-    with e -> return None }    
+    with e -> 
+      printfn "[ERROR] Bing failed: %A" e
+      return None }    
 
 
 // --------------------------------------------------------------------------------------
@@ -219,6 +223,9 @@ let replay = SchedulerAgent<Tweet>()
 let geoLocated = Event<Tweet>() 
 let alt = AlternativeSourceAgent<Tweet>(3000)
 
+replay.ErrorOccurred.Add(printfn "[ERROR] Replay agent failed %A")
+alt.ErrorOccurred.Add(printfn "[ERROR] Alt agent failed %A")
+
 // Handle tweets that come with a geolocation information (yay!)
 liveTweets
 |> Observable.choose (fun tw ->
@@ -228,9 +235,11 @@ liveTweets
           { tw with GeoLocationSource = "Twitter"; InferredLocation = Some loc; 
                     InferredArea = Some tw.OriginalArea }) |> Some
     | _ -> None)
-|> Observable.add (fun tw ->
-    geoLocated.Trigger(snd tw)
-    replay.AddEvent(tw) )
+|> Observable.addWithError 
+    (fun tw ->
+      geoLocated.Trigger(snd tw)
+      replay.AddEvent(tw) )
+    (printfn "[ERROR] GPS live tweets failed: %A")
 
 
 // To show more tweets on the map when not enought location data is available, we
@@ -248,7 +257,7 @@ geoLocated.Publish
     |> Seq.mapi (fun i buf -> i, buf.Values |> List.choose id)
     |> Seq.filter (fun (i, buf) -> not (List.isEmpty buf))
     |> Map.ofSeq )
-|> Observable.add (locations.SetState)
+|> Observable.addWithError (locations.SetState) (printfn "[ERROR] Geolocated tweets failed: %A")
 
 // Annotate the live tweets with the current state
 liveTweets |> Observable.add (locations.AddEvent)
@@ -256,15 +265,17 @@ liveTweets |> Observable.add (locations.AddEvent)
 // "Geo-locate" the tweet and post it to the alternative source which is only
 // used when not enough good data is available
 locations.EventOccurred
-|> Observable.add(fun (map, tw) -> 
+|> Observable.addWithError(fun (map, tw) -> 
     map.TryFind tw.Phrase |> Option.iter (fun locations ->
       let loc = locations.[Random().Next(locations.Length)]
       let tw = { tw with GeoLocationSource = "Random"; InferredLocation = Some loc; InferredArea = Some tw.OriginalArea  }
       alt.AddEvent(tw) ))
+    (printfn "[ERROR] Locations tweets failed: %A")
 
 // Replay events from the alternative source
 alt.EventOccurred 
-|> Observable.add (fun tw -> replay.AddEvent(tw.Tweeted.AddSeconds(10.0), tw))
+|> Observable.addWithError (fun tw -> replay.AddEvent(tw.Tweeted.AddSeconds(10.0), tw))
+    (printfn "[ERROR] Alt tweets failed: %A")
 
 
 // Geolocating tweets using MapQuest or Bing occasionally...
@@ -283,10 +294,11 @@ let startGeoLocating i rate f =
         tw.Tweeted.AddSeconds(10.0),
         { tw with GeoLocationSource = api; InferredLocation = Some loc; InferredArea = Some area }) })
   |> Observable.choose id
-  |> Observable.add (fun tw ->
+  |> Observable.addWithError (fun tw ->
       alt.Ping() 
       geoLocated.Trigger(snd tw)
       replay.AddEvent(tw) )
+    (printfn "[ERROR] Geolocated using %d tweets failed: %A" i)
 
 startGeoLocating 0 5000 Bing.locate
 startGeoLocating 1 6000 MapQuest.locate
