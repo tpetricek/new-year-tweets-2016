@@ -16,6 +16,9 @@ interactive web site that tracks the "Happy New Year" tweets live across the glo
 partly inspired by [Happy New Year Tweets](http://twitter.github.io/interactive/newyear2014/)
 from Twitter in 2014, but rather than analyzing data in retrospect, you can watch 2016 come live!
 
+See it live & read more 
+-----------------------
+
 Without further ado, here are the important links:
 
  - [Happy New Year 2016 around the World](http://newyear-tweets.cloudapp.net/) live web site!<br />
@@ -24,4 +27,10 @@ Without further ado, here are the important links:
    (Feel free to modify it and use it for other events!)
  - [Post with all the technical details](http://tomasp.net/blog/2015/happy-new-year-tweets) on my blog
  
+
+Demo from before the New Year
+-----------------------------
+
+Here is a brief screenshot showing the project on December 29. There are a couple of wishes already:
+
 <img align="right" src="https://github.com/tpetricek/new-year-tweets-2016/raw/master/data/image.gif" alt="Happy New Year Tweets" />
