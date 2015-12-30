@@ -195,6 +195,7 @@ let liveTweets =
 // Start the Twitter search 
 search.Start()
 
+// let liveTweets = (new Event<Tweet>()).Publish
 
 // --------------------------------------------------------------------------------------
 // Calculate frequencies of individual phrases - how many times did 
@@ -376,7 +377,11 @@ let part =
       Files.browse root ]
 
 // Start the server using the IP & port specified in the config
-let config = { defaultConfig with bindings = [ HttpBinding.mk' Protocol.HTTP Config.IP Config.Port ] }
+let config = 
+  { defaultConfig with 
+      logger = Logging.Loggers.saneDefaultsFor Logging.LogLevel.Verbose
+      maxOps = 10000
+      bindings = [ HttpBinding.mk' Protocol.HTTP Config.IP Config.Port ] }
 let start, run = startWebServerAsync config part
 let ct = new System.Threading.CancellationTokenSource()
 Async.Start(run, ct.Token)
