@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Happy New Year 2016 around the World</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
   <script src="/datamaps.world.min.js"></script>
@@ -9,10 +10,10 @@
   <link href='https://fonts.googleapis.com/css?family=Raleway|Comfortaa:700' rel='stylesheet' type='text/css'>
   <style>
     * { margin:0px; padding:0px; }
-    body { font:12pt Raleway; background:black; color:#f0f0f0; }
-    h1 { font:33pt Comfortaa; margin:0px 0px 5px 0px; }
-    h2 { font:24pt Comfortaa; margin:30px 0px 5px 0px; }
-    #content { max-width:1200px; padding:30px; background:#181818; margin-left:auto; margin-right:auto; }
+    body { font:16px Raleway; background:black; color:#f0f0f0; }
+    h1 { font:40px Comfortaa; margin:0px 0px 5px 0px; }
+    h2 { font:30px Comfortaa; margin:30px 0px 5px 0px; }
+    #content { max-width:1200px; padding:30px 10px 30px 10px; background:#181818; margin-left:auto; margin-right:auto; }
     
     #map { margin:30px 0px 0px 0px; }
     .hoverinfo { padding:10px !important; border-color:#404040 !important; background:rgba(0,0,0,0.75) !important; max-width:300px; }
@@ -25,17 +26,17 @@
     #tweets, #tweets li { list-style-type:none; }
     #tweets li { margin:0px 20px 0px 30px; }
     #tweets li img { float:left; width:50px; height:50px; border-radius:25px; opacity:0.7; }
-    #tweets li p { position:relative; margin-left:80px; }
+    #tweets li p { font-size:16px; position:relative; margin-left:80px; }
     
     #tweetthis { float:right; margin-top:15px; }
-    .cr { min-height:550px; }
     .cb { clear:both; margin-bottom:100px }
     .cb p { color:#909090; margin-bottom:15px; }
     .cb a { color:#a0a0a0; font-weight:bold; }
-    
-    @media (min-width: 1000px) {
+
+    @media (min-width: 800px) {
+      #content { padding:30px; }
       #phrases { padding-top:50px; }
-      .cl { float:left; width:48%; }
+      .cl { float:left; min-height:500px; width:48%; }
       .cr { width:48%;margin-left:51%; }
       .cb p { margin-left:220px; }
       .cb h2 { float:left; margin-top:20px; width:200px; }
@@ -156,6 +157,14 @@
       if (oh < 40) p.css("padding-top", (40-oh)/2);
       li.css("height", "0px")
       li.animate({opacity:1, height:nh + 15}, "linear");
+
+      var minHeight = 150;
+      var heights = $("#tweets li").toArray().forEach(function(el) { minHeight += $(el).height(); });
+      if (window.minCrHeight == null || minHeight > window.minCrHeight) {
+        console.log(minHeight);
+        window.minCrHeight = minHeight;
+        $(".cr").css("min-height", minHeight + "px");
+      }      
     };
   }
   
@@ -169,7 +178,7 @@
       {
         // Initialize the word cloud with <span> for each phrase (1st time only)
         res.forEach(function(pc) { 
-          $("#phrases").append($("<span>" + pc.phrase + "</span>"));
+          $("#phrases").append($("<span style='font-size:0px;margin-left:0px;margin-right:0px'>" + pc.phrase + "</span>"));
         });
         pps = $("#phrases span");          
       }         
@@ -178,11 +187,12 @@
       var lookup = { };
       res.forEach(function(pc) { lookup[pc.phrase] = pc.count; });
       
+      var mult = ($("body").width() > 800) ? 1 : 0.6;
       var colors = ['#7fc97f', '#beaed4', '#fdc086', '#ffff99' ];
       var colorIndex = -1;
       pps.each(function() { 
         var count = lookup[$(this).text()];
-        var size = 15 + 40 * ((1 + count) / 100); 
+        var size = mult * (15 + 40 * ((1 + count) / 100)); 
         if (count == 0) size = 0;
         else
         {
