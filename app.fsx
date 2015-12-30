@@ -287,6 +287,7 @@ let indexedTweets =
 let startGeoLocating i rate f = 
   indexedTweets 
   |> Observable.filter (fun (n, _) -> n = i)
+  |> Observable.filter (fun (_, tw) -> tw.OriginalArea |> Seq.exists Char.IsLetter)
   |> Observable.limitRate rate
   |> Observable.mapAsyncIgnoreErrors (fun (_, tw) -> async {
       let! located = f tw.OriginalArea
