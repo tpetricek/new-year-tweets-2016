@@ -15,6 +15,7 @@ open FSharp.Data.Toolbox.Twitter
 open AsyncHelpers
 
 open Suave
+open Suave.Types
 open Suave.Web
 open Suave.Http
 open Suave.Http.Applicatives
@@ -361,28 +362,8 @@ let part =
       path "/">>= Files.browseFile root "index.html" 
       Files.browse root ]
 
-open Suave.Types
-
+// Start the server using the IP & port specified in the config
 let config = { defaultConfig with bindings = [ HttpBinding.mk' Protocol.HTTP Config.IP Config.Port ] }
 let start, run = startWebServerAsync config part
 let ct = new System.Threading.CancellationTokenSource()
 Async.Start(run, ct.Token)
-
-
-let disp = feedTweets.Subscribe(fun tw ->
-  printfn "FEED\n%s\n\n" tw)
-
-//let disp = mapTweets.Subscribe(fun tw ->
-//  printfn "MAP\n%s\n\n" tw)
-//disp.Dispose()
-
-(*
-ct.Cancel()
-
-let disp = .EventOccurred.Subscribe(fun tw ->
-  printfn "%s (%s)\n%s\n" tw.InferredArea.Value tw.GeoLocationSource tw.Text)
-disp.Dispose()
-
-search.Stop()
-
-*)

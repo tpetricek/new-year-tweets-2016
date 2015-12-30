@@ -10,8 +10,8 @@
   <style>
     * { margin:0px; padding:0px; }
     body { font:12pt Raleway; background:black; color:#f0f0f0; }
-    h1 { font:34pt Comfortaa; margin:0px 0px 5px 0px; }
-    h2 { font:26pt Comfortaa; margin:30px 0px 5px 0px; }
+    h1 { font:33pt Comfortaa; margin:0px 0px 5px 0px; }
+    h2 { font:24pt Comfortaa; margin:30px 0px 5px 0px; }
     #content { max-width:1200px; padding:30px; background:#181818; margin-left:auto; margin-right:auto; }
     
     #map { margin:30px 0px 0px 0px; }
@@ -21,21 +21,37 @@
     #phrases { padding:20px 10% 10px 10%; text-align:center; }
     #phrases span { font-family:Comfortaa; margin-top:10px; margin-bottom:10px; transition:all 1s ease; }
     
-    #tweets { margin-top:20px; min-height:500px; }    
+    #tweets { margin-top:20px; }    
     #tweets, #tweets li { list-style-type:none; }
     #tweets li { margin:0px 20px 0px 30px; }
     #tweets li img { float:left; width:50px; height:50px; border-radius:25px; opacity:0.7; }
     #tweets li p { position:relative; margin-left:80px; }
     
+    #tweetthis { float:right; margin-top:15px; }
+    .cr { min-height:500px; }
+    .cb { clear:both; margin-bottom:100px }
+    .cb p { color:#909090; margin-bottom:15px; }
+    .cb a { color:#a0a0a0; font-weight:bold; }
+    
     @media (min-width: 900px) {
       #phrases { padding-top:50px; }
       .cl { float:left; width:48%; }
       .cr { width:48%;margin-left:51%; }
+      .cb p { margin-left:220px; }
+      .cb h2 { float:left; margin-top:20px; width:200px; }
     } 
   </style>
 </head>
 <body>
   <div id="content">
+    <div id="tweetthis">
+      <a href="https://twitter.com/share" class="twitter-share-button"{count} 
+        data-url="http://http://newyear-tweets.cloudapp.net/" 
+        data-text="Happy New Year 2016 around the World #fsharp #dataviz" 
+        data-via="tomaspetricek" data-size="large" data-dnt="true">Tweet</a> 
+      <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    </div>
+  
     <h1>Happy New Year 2016 around the World</h1>  
     <p>Follow the beginning of 2016 on Twitter. Watch the 'Happy New Year' tweets live across the globe!</p>  
     <div id="map" style="position:relative; width:90%; margin-left:5%;"></div>
@@ -51,6 +67,24 @@
       <ul id="tweets">
       </ul>
     </div>
+    
+    <div class="cb">
+      <h2>About This</h2>
+      <p>This project was put together by <a href="https://twitter.com/tomaspetricek/">@tomnaspetricek</a>
+        for <a href="https://twitter.com/search?q=%23FsAdvent">#FsAdvent</a>. It is created using the 
+        awesome <a href="http://www.fsharp.org">F# language<a>. The back-end is hosted on Azure using
+        the <a href="http://suave.io">Suave.io</a> server and the front-end is using 
+        <a href="http://datamaps.github.io/">Datamaps</a>. It is partly inspired by 
+        <a href="http://twitter.github.io/interactive/newyear2014/">Twitter's New Year 2014</a>.          
+      </p>
+      <p>
+        I wrote a <a href="http://tomasp.net/blog/2015/happy-new-year-tweets">detailed blog post</a>
+        about the technical details and so if you are a developer, you can find more information there.
+        The complete source code is available <a href="https://github.com/tpetricek/new-year-tweets-2016">on GitHub</a> under
+        the Apache 2.0 license. Have fun!
+      </p>
+    </div>
+     
 </div>
 <script>
 
@@ -217,6 +251,15 @@
   window.addEventListener("load", listenToMapTweets, false);
   window.addEventListener("load", listenToFeedTweets, false);
   window.addEventListener("load", listenToFrequencies, false);
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1561220-6', 'auto');
+  ga('send', 'pageview');
 </script>
 </body>
 </html>
