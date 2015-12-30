@@ -161,7 +161,6 @@
       var minHeight = 150;
       var heights = $("#tweets li").toArray().forEach(function(el) { minHeight += $(el).height(); });
       if (window.minCrHeight == null || minHeight > window.minCrHeight) {
-        console.log(minHeight);
         window.minCrHeight = minHeight;
         $(".cr").css("min-height", minHeight + "px");
       }      
