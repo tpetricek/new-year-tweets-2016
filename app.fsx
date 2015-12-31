@@ -216,8 +216,8 @@ search.Start()
 let phraseCounts = 
   liveTweets 
   |> Observable.map (fun tw -> tw.Phrase)
-  |> Observable.limitRate 100
-  |> Observable.aggregateOver 300 -1 (fun buffer ->
+  |> Observable.limitRate 50
+  |> Observable.aggregateOver 200 -1 (fun buffer ->
       let counts = Seq.countBy id buffer |> Seq.filter (fun (k, v) -> k <> -1) |> dict
       phrases |> List.mapi (fun i p -> 
         match counts.TryGetValue(i) with
