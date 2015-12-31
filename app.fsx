@@ -165,6 +165,7 @@ let phrases =
   "#हैप्पीन्यूयर"; "#GodtNyttÅr"; "#SzczęśliwegoNowegoRoku"; "#FelizAnoNovo"; "#ਹੈਪੀਨਿਊਯੀਅਰ";
   "#LaMulțiAni"; "#СНовымГодом"; "#FelizAñoNuevo"; "#GottNyttÅr"; "#ManigongBagongTaon";
   "#ஹேப்பிநியூஇயர்"; "#สวัสดีปีใหม่"; "#MutluYıllar"; "#ЗНовимРоком"; "نیا_سال_مبارک#" ]
+  |> List.map (fun s -> s.ToLower())
 
 // Connect to twitter using the application access key (directly) & search for tweets!
 let ctx = 
@@ -215,7 +216,8 @@ search.Start()
 let phraseCounts = 
   liveTweets 
   |> Observable.map (fun tw -> tw.Phrase)
-  |> Observable.aggregateOver 100 -1 (fun buffer ->
+  |> Observable.limitRate 100
+  |> Observable.aggregateOver 300 -1 (fun buffer ->
       let counts = Seq.countBy id buffer |> Seq.filter (fun (k, v) -> k <> -1) |> dict
       phrases |> List.mapi (fun i p -> 
         match counts.TryGetValue(i) with
@@ -348,7 +350,7 @@ let mapTweets =
 let _, feedTweets = 
   liveTweets
   |> Observable.filter (fun tw -> not tw.IsRetweet)
-  |> Observable.limitRate 750
+  |> Observable.limitRate 850
   |> Observable.map (fun tweet ->
       JsonTypes.SocketFeedTweet(
         tweet.Text, tweet.OriginalArea, tweet.PictureUrl, tweet.UserName, tweet.UserScreenName).JsonValue.ToString())
