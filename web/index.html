@@ -144,7 +144,7 @@
     websocket = new WebSocket(root + "feedtweets");
     websocket.onmessage = function(evt) { 
       var res = JSON.parse(evt.data);    
-      $("#tweets li").slice(5, $("#tweets li").length).remove();
+      $("#tweets li").slice(6, $("#tweets li").length).remove();
       
       var li = $("<li style='opacity:0;xoverflow:hidden' />");
       var p = $("<p>" + cleanText(res.text) + "</p>");
@@ -191,7 +191,7 @@
       var colorIndex = -1;
       pps.each(function() { 
         var count = lookup[$(this).text()];
-        var size = mult * (12 + 38 * ((1 + count) / 300)); 
+        var size = mult * (15 + 40 * ((1 + count) / 300)); 
         if (count == 0) size = 0;
         else
         {
