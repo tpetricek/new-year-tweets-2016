@@ -214,7 +214,7 @@ let liveTweets =
       | _ -> None )
 
 // Start the Twitter search 
-//search.Start()
+search.Start()
 
 let s = liveTweets.Subscribe(printfn "%A")
 s.Dispose()
