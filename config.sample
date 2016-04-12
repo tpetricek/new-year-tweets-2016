@@ -14,3 +14,7 @@ let [<Literal>] TwitterAccessSecret = "..."
 // Configruation for the server
 let [<Literal>] IP = "127.0.0.1" 
 let [<Literal>] Port = 8083
+
+/// Some "Worldwide" uses phrases that are currently trending Worldwide
+/// while None uses pre-defined Happy New Year phrases 
+let TrendingRegion = Some "Worldwide"

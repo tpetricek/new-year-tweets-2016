@@ -2,6 +2,7 @@ config.fsx
 .fake
 .paket/paket.exe
 *.suo
+*.bak
 bin
 obj
 packages
