@@ -9,16 +9,17 @@
 
 open System
 open System.Web
+open System.Text
 open System.Collections.Generic
 open FSharp.Data
 open FSharp.Data.Toolbox.Twitter
 open AsyncHelpers
 
 open Suave
-open Suave.Types
 open Suave.Web
 open Suave.Http
-open Suave.Http.Applicatives
+open Suave.Filters
+open Suave.Operators
 open Suave.Sockets
 open Suave.Sockets.Control
 open Suave.Sockets.AsyncSocket
@@ -147,9 +148,14 @@ type Tweet =
     InferredArea : option<string>
     InferredLocation : option<decimal * decimal> }
       
+// Connect to twitter using the application access key (directly) & search for tweets!
+let ctx = 
+  { ConsumerKey = Config.TwitterKey; ConsumerSecret = Config.TwitterSecret; 
+     AccessToken = Config.TwitterAccessToken; AccessSecret = Config.TwitterAccessSecret } 
+let twitter = Twitter(UserContext(ctx))
 
 /// New Year Tweets from: http://twitter.github.io/interactive/newyear2014/
-let phrases = 
+let newYearPhrases = 
  ["새해 복 많이 받으세요"; "あけまして　おめでとう　ございます"; "新年快乐"; "manigong bagong taon"
   "Срећна Нова година"; "честита нова година"; "selamat tahun baru"; "สวัสดีปีใหม่"; "sugeng warsa enggal"
   "С Новым Годом"; "šťastný nový rok"; "عام سعيد"; "Щасливого Нового Року"; "שנה טובה"
@@ -167,11 +173,17 @@ let phrases =
   "#ஹேப்பிநியூஇயர்"; "#สวัสดีปีใหม่"; "#MutluYıllar"; "#ЗНовимРоком"; "نیا_سال_مبارک#" ]
   |> List.map (fun s -> s.ToLower())
 
-// Connect to twitter using the application access key (directly) & search for tweets!
-let ctx = 
-  { ConsumerKey = Config.TwitterKey; ConsumerSecret = Config.TwitterSecret; 
-     AccessToken = Config.TwitterAccessToken; AccessSecret = Config.TwitterAccessSecret } 
-let twitter = Twitter(UserContext(ctx))
+/// Alternatively, we can just get trending phrases for a region 
+let trendingPhrases region = 
+  [ let world = twitter.Trends.Available() |> Seq.find (fun t -> t.Name = region)
+    let trends = twitter.Trends.Place(world.Woeid)
+    for t in trends.[0].Trends do yield t.Name ]
+
+let phrases =
+  match Config.TrendingRegion with
+  | None -> newYearPhrases
+  | Some region -> trendingPhrases region
+
 let search = twitter.Streaming.FilterTweets phrases 
 
 // Returns an observable of live parsed tweets with minimal filtering
@@ -202,8 +214,10 @@ let liveTweets =
       | _ -> None )
 
 // Start the Twitter search 
-search.Start()
+//search.Start()
 
+let s = liveTweets.Subscribe(printfn "%A")
+s.Dispose()
 // let liveTweets = (new Event<Tweet>()).Publish
 
 // --------------------------------------------------------------------------------------
@@ -364,10 +378,10 @@ let _, phraseUpdates =
   |> Observable.start
 
 /// Passes updates from IObservable<string> to a socket
-let socketOfObservable updates (webSocket : WebSocket) cx = socket {
+let socketOfObservable (updates:IObservable<string>) (webSocket:WebSocket) cx = socket {
   while true do
     let! update = updates |> Async.AwaitObservable |> Suave.Sockets.SocketOp.ofAsync
-    do! webSocket.send Text (UTF8.bytes update) true }
+    do! webSocket.send Text (Encoding.UTF8.GetBytes update) true }
 
 /// Time-zone information (calcualted just once) packaged as a JSON
 let timeZonesJson = 
@@ -379,19 +393,19 @@ let timeZonesJson =
 let part =
   let root = IO.Path.Combine(__SOURCE_DIRECTORY__, "web")
   choose 
-    [ path "/maptweets" >>= handShake (socketOfObservable mapTweets)
-      path "/feedtweets" >>= handShake (socketOfObservable feedTweets)
-      path "/frequencies" >>= handShake (socketOfObservable phraseUpdates)
-      path "/zones" >>= Successful.OK timeZonesJson
-      path "/">>= Files.browseFile root "index.html" 
+    [ 
+      path "/maptweets" >=> handShake (socketOfObservable mapTweets)
+      path "/feedtweets" >=> handShake (socketOfObservable feedTweets)
+      path "/frequencies" >=> handShake (socketOfObservable phraseUpdates)
+      path "/zones" >=> Successful.OK timeZonesJson
+      path "/" >=> Files.browseFile root "index.html" 
       Files.browse root ]
 
 // Start the server using the IP & port specified in the config
 let config = 
   { defaultConfig with 
       logger = Logging.Loggers.saneDefaultsFor Logging.LogLevel.Verbose
-      maxOps = 10000
-      bindings = [ HttpBinding.mk' Protocol.HTTP Config.IP Config.Port ] }
+      bindings = [ HttpBinding.mkSimple Protocol.HTTP Config.IP Config.Port ] }
 let start, run = startWebServerAsync config part
 let ct = new System.Threading.CancellationTokenSource()
 Async.Start(run, ct.Token)

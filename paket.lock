@@ -1,12 +1,12 @@
 NUGET
-  remote: http://nuget.org/api/v2
+  remote: http://www.nuget.org/api/v2
   specs:
     FSharp.Compiler.Tools (4.0.0.1)
     FSharp.Core (4.0.0.1)
     FSharp.Data (2.2.5)
-      Zlib.Portable (>= 1.10.0) - framework: portable-net40+sl50+wp80+win80
-    FSharp.Data.Toolbox.Twitter (0.12)
+      Zlib.Portable (>= 1.10) - framework: portable-net40+sl50+wp80+win80
+    FSharp.Data.Toolbox.Twitter (0.14)
       FSharp.Data (>= 2.2.3)
-    Suave (0.33.0)
+    Suave (1.1.2)
       FSharp.Core (>= 3.1.2.5)
-    Zlib.Portable (1.11.0) - framework: portable-net40+sl50+wp80+win80
+    Zlib.Portable (1.11) - framework: portable-net40+sl50+wp80+win80
